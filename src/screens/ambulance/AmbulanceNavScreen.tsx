@@ -8,7 +8,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import MapView, { Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { VitalsGrid } from '../../components/VitalsGrid';
 import { Colors } from '../../constants/colors';
@@ -82,21 +81,9 @@ export function AmbulanceNavScreen() {
           </View>
         </View>
 
-        <MapView
-          style={styles.map}
-          initialRegion={{
-            latitude: 23.255,
-            longitude: 77.415,
-            latitudeDelta: 0.06,
-            longitudeDelta: 0.06,
-          }}>
-          <Marker coordinate={CURRENT} title="Current" tracksViewChanges={false}>
-            <View style={[styles.marker, { backgroundColor: Colors.info }]} />
-          </Marker>
-          <Marker coordinate={JP} title="JP Hospital" tracksViewChanges={false}>
-            <View style={[styles.marker, { backgroundColor: Colors.danger }]} />
-          </Marker>
-        </MapView>
+        <View style={styles.mapPlaceholder}>
+          <Text style={styles.placeholderText}>Map navigation disabled</Text>
+        </View>
 
         <View style={styles.preNote}>
           <Text style={styles.preNoteText}>
@@ -138,8 +125,16 @@ const styles = StyleSheet.create({
     borderColor: Colors.border,
   },
   etaText: { ...Typography.small, color: Colors.dangerDark, fontWeight: '600' },
-  map: { height: 180, width: '100%', borderRadius: 12, overflow: 'hidden', marginBottom: 12 },
-  marker: { width: 14, height: 14, borderRadius: 7, borderWidth: 2, borderColor: Colors.white },
+  mapPlaceholder: {
+    height: 180,
+    width: '100%',
+    borderRadius: 12,
+    backgroundColor: Colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: 12,
+  },
+  placeholderText: { ...Typography.body, color: Colors.textSecondary },
   preNote: {
     borderRadius: 12,
     borderWidth: 1.5,

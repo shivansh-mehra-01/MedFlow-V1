@@ -7,7 +7,6 @@ import {
   Text,
   View,
 } from 'react-native';
-import MapView, { Callout, Marker } from 'react-native-maps';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { HospitalCard } from '../../components/HospitalCard';
 import { Colors } from '../../constants/colors';
@@ -46,32 +45,9 @@ export function HospitalMapScreen() {
   return (
     <SafeAreaView style={styles.safe} edges={['top']}>
       <Text style={styles.screenTitle}>{Labels.map}</Text>
-      <MapView
-        style={styles.map}
-        initialRegion={{
-          latitude: 23.2599,
-          longitude: 77.4126,
-          latitudeDelta: 0.08,
-          longitudeDelta: 0.08,
-        }}>
-        {mockHospitals.map(h => (
-          <Marker
-            key={h.id}
-            coordinate={{ latitude: h.lat, longitude: h.lng }}
-            tracksViewChanges={false}>
-            <View style={[styles.markerDot, { backgroundColor: markerColor(h.status) }]} />
-            <Callout
-              onPress={() =>
-                Alert.alert(h.name, `${h.address}\nICU free: ${h.icuFree}`)
-              }>
-              <View style={styles.callout}>
-                <Text style={styles.calloutTitle}>{h.name}</Text>
-                <Text style={styles.calloutSub}>ICU free: {h.icuFree}</Text>
-              </View>
-            </Callout>
-          </Marker>
-        ))}
-      </MapView>
+      <View style={styles.mapPlaceholder}>
+        <Text style={styles.placeholderText}>Hospital Map View Disabled</Text>
+      </View>
 
       <View style={styles.legend}>
         <LegendDot color={Colors.danger} label="Full" />
@@ -115,11 +91,14 @@ const styles = StyleSheet.create({
   safe: { flex: 1, backgroundColor: Colors.background },
   loader: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   screenTitle: { ...Typography.h1, color: Colors.textPrimary, paddingHorizontal: 16, marginBottom: 8 },
-  map: { height: 220, width: '100%' },
-  markerDot: { width: 16, height: 16, borderRadius: 8, borderWidth: 2, borderColor: Colors.white },
-  callout: { padding: 8, maxWidth: 200 },
-  calloutTitle: { ...Typography.h3, color: Colors.textPrimary },
-  calloutSub: { ...Typography.small, color: Colors.textSecondary, marginTop: 4 },
+  mapPlaceholder: {
+    height: 220,
+    width: '100%',
+    backgroundColor: Colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  placeholderText: { ...Typography.body, color: Colors.textSecondary },
   legend: {
     flexDirection: 'row',
     flexWrap: 'wrap',

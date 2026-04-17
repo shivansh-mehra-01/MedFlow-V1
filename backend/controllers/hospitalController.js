@@ -11,7 +11,7 @@ const getHospitals = async (req, res) => {
       sortBy = 'name', 
       order = 'asc',
       page = 1,
-      limit = 10
+      limit = 50
     } = req.query;
 
     // Build query
@@ -20,21 +20,30 @@ const getHospitals = async (req, res) => {
     // Search functionality
     if (search) {
       query.$or = [
-        { name: { $regex: search, $options: 'i' } },
+        { hospitalName: { $regex: search, $options: 'i' } },
         { address: { $regex: search, $options: 'i' } },
         { specialists: { $in: [new RegExp(search, 'i')] } }
       ];
     }
 
-    // Filter by status
+    // Filter by status (Map frontend status to DB status)
     if (status) {
-      query.status = status;
+      const statusMap = {
+        'available': 'green',
+        'moderate': 'amber',
+        'full': 'red'
+      };
+      query.status = statusMap[status] || status;
     }
 
     // Sorting options
     const sortOptions = {};
-    const allowedSortFields = ['name', 'status', 'rating', 'createdAt'];
-    const sortField = allowedSortFields.includes(sortBy) ? sortBy : 'name';
+    const allowedSortFields = ['name', 'hospitalName', 'status', 'rating', 'createdAt'];
+    let sortField = allowedSortFields.includes(sortBy) ? sortBy : 'hospitalName';
+    
+    // Map 'name' to 'hospitalName' for database
+    if (sortField === 'name') sortField = 'hospitalName';
+    
     sortOptions[sortField] = order === 'desc' ? -1 : 1;
 
     // Pagination
@@ -45,15 +54,38 @@ const getHospitals = async (req, res) => {
       .skip(skip)
       .limit(parseInt(limit));
 
+    const mappedHospitals = hospitals.map(h => ({
+      id: h._id,
+      name: h.hospitalName,
+      address: h.address,
+      distance: "2.5 km", // Dummy distance for now
+      status: h.status === 'green' ? 'available' : h.status === 'amber' ? 'moderate' : 'full',
+      lat: h.coordinates?.lat || 0,
+      lng: h.coordinates?.lng || 0,
+      icuTotal: h.icuBeds || 0,
+      icuFree: h.icuAvailable ?? (h.icuBeds || 0),
+      generalTotal: h.totalBeds || 0,
+      generalFree: h.availableBeds ?? (h.totalBeds || 0),
+      otTotal: 5,
+      otFree: 3,
+      specialists: h.specialties || [],
+      contact: {
+        phone: h.phone,
+        email: "hospital@example.com"
+      },
+      emergencyServices: h.emergency,
+      rating: h.rating || 4.0
+    }));
+
     const total = await Hospital.countDocuments(query);
 
     res.json({
       success: true,
-      count: hospitals.length,
+      count: mappedHospitals.length,
       total,
       pages: Math.ceil(total / limit),
       currentPage: parseInt(page),
-      data: hospitals
+      data: mappedHospitals
     });
   } catch (error) {
     res.status(500).json({

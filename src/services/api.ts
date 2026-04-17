@@ -5,7 +5,7 @@ import axios from 'axios';
  * Connects to the local backend server.
  */
 export const apiClient = axios.create({
-  baseURL: 'http://10.244.66.235:5000/api',
+  baseURL: 'http://10.244.66.201:5000/api',
   timeout: 15000,
   headers: {
     'Content-Type': 'application/json',
